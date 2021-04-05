@@ -17,7 +17,7 @@ trait MemoryLimit
             return $this->memoryLimit;
         }
         $limit = \ini_get('memory_limit') === '-1' ? PHP_INT_MAX : \ini_get('memory_limit');
-        return $this->memoryLimit = $this->toBytes($limit);
+        return $this->memoryLimit = $this->toBytes((string) $limit);
     }
 
     /**

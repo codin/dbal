@@ -24,11 +24,16 @@ class GatewayError extends Exception
 
     public static function driverException(DriverException $e): self
     {
-        return new self('There was error executing query', $e->getCode(), $e);
+        return new self('There was error executing query', 0, $e);
     }
 
     public static function updateException(DriverException $e): self
     {
-        return new self('There was error executing update', $e->getCode(), $e);
+        return new self('There was error executing update', 0, $e);
+    }
+
+    public static function invalidInsert(): self
+    {
+        return new self('Insert params must contain at least one key-value.');
     }
 }

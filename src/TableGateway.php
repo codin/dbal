@@ -7,9 +7,9 @@ namespace Codin\DBAL;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Query\QueryBuilder;
 
-abstract class TableGateway implements Contracts\Gateway
+class TableGateway implements Contracts\Gateway
 {
-    use Traits\Commands, Traits\MemoryLimit, Traits\Aggregation;
+    use Traits\Models, Traits\Commands, Traits\MemoryLimit, Traits\Aggregation;
 
     /**
      * The database connection
@@ -29,44 +29,17 @@ abstract class TableGateway implements Contracts\Gateway
     /**
      * The table name
      */
-    protected string $table = '';
+    protected string $table;
 
     /**
      * The primary key name
      */
-    protected string $primary = '';
+    protected string $primary;
 
     public function __construct(Connection $conn, ?Contracts\Model $prototype = null)
     {
         $this->conn = $conn;
         $this->prototype = $prototype;
-
-        if ('' === $this->table) {
-            throw Exceptions\GatewayError::undefinedTableName($this);
-        }
-
-        if ('' === $this->primary) {
-            throw Exceptions\GatewayError::undefinedPrimaryKey($this);
-        }
-    }
-
-    /**
-     * Create a new entity
-     */
-    protected function createModel(): Contracts\Model
-    {
-        if ($this->prototype instanceof Contracts\Model) {
-            return clone $this->prototype;
-        }
-
-        // create prototype from model class name if one was set
-        if (is_string($this->model) && class_exists($this->model)) {
-            return new $this->model;
-        }
-
-        // create anon object class to create rows from
-        return new class() implements Contracts\Model {
-        };
     }
 
     /**
@@ -74,6 +47,9 @@ abstract class TableGateway implements Contracts\Gateway
      */
     public function getTable(): string
     {
+        if (!isset($this->table) || '' === $this->table) {
+            throw Exceptions\GatewayError::undefinedTableName($this);
+        }
         return $this->table;
     }
 
@@ -82,6 +58,9 @@ abstract class TableGateway implements Contracts\Gateway
      */
     public function getPrimary(): string
     {
+        if (!isset($this->primary) || '' === $this->primary) {
+            throw Exceptions\GatewayError::undefinedPrimaryKey($this);
+        }
         return $this->primary;
     }
 
@@ -98,6 +77,6 @@ abstract class TableGateway implements Contracts\Gateway
      */
     public function getQueryBuilder(): QueryBuilder
     {
-        return $this->getConnection()->createQueryBuilder()->select('*')->from($this->table);
+        return $this->getConnection()->createQueryBuilder()->select('*')->from($this->getTable());
     }
 }

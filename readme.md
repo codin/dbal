@@ -27,15 +27,7 @@ $conn = new Doctrine\DBAL\Connection(['pdo' => new PDO('sqlite:products.db')]);
 $conn->exec('create table if not exists products (uuid string, sku string, desc string)');
 
 $products = new Products($conn);
-
-// create from array
-// or with assignments $banana->desc = ...
-$banana = new Product(['desc' => 'banana', 'sku' => 'ban1', 'uuid' => 'BAN01']);
-$products->persist($banana);
-
+$products->insert(['desc' => 'banana', 'sku' => 'ban1', 'uuid' => 'BAN01']);
 $banana = $products->fetch();
 echo $product->desc; // "banana"
-
-$banana->desc = 'purple banana';
-$products->persist($banana);
 ```

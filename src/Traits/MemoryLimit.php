@@ -6,16 +6,18 @@ namespace Codin\DBAL\Traits;
 
 trait MemoryLimit
 {
+    protected int $memoryLimit = 0;
+
     /**
      * Get memory limit in bytes
      */
     protected function getMemoryLimit(): int
     {
-        $limit = \ini_get('memory_limit');
-        if ($limit === '-1' || empty($limit)) {
-            return PHP_INT_MAX;
+        if ($this->memoryLimit) {
+            return $this->memoryLimit;
         }
-        return $this->toBytes($limit);
+        $limit = \ini_get('memory_limit') === '-1' ? PHP_INT_MAX : \ini_get('memory_limit');
+        return $this->memoryLimit = $this->toBytes($limit);
     }
 
     /**
@@ -26,12 +28,22 @@ trait MemoryLimit
         \sscanf($string, '%u%c', $number, $suffix);
 
         if (isset($suffix)) {
-            $exp = \strpos(' KMG', \strtoupper($suffix));
+            $exp = \strpos(' KMGT', \strtoupper($suffix));
             if (false !== $exp) {
                 $number = $number * \pow(1024, $exp);
             }
         }
 
         return $number;
+    }
+
+    /**
+     * Get memory remaining
+     */
+    protected function getMemoryRemaining(int $buffer = 1048576): int
+    {
+        $limit = $this->getMemoryLimit();
+        $current = \memory_get_usage();
+        return $limit - ($current + $buffer);
     }
 }

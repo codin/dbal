@@ -2,14 +2,16 @@
 
 namespace spec\Codin\DBAL;
 
-use Codin\DBAL\Contracts;
 use Codin\DBAL\Exceptions;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Query\QueryBuilder;
+use function error_reporting;
+use function ini_set;
 use PhpSpec\ObjectBehavior;
 
-require __DIR__ . '/mocks.php';
+error_reporting(-1);
+ini_set('display_errors', 1);
 
 class TableGatewaySpec extends ObjectBehavior
 {
@@ -169,17 +171,10 @@ class TableGatewaySpec extends ObjectBehavior
 
     public function it_should_work_with_prototype_models()
     {
-        $model = new class() implements Contracts\Model {
-            public string $uuid;
-            public string $sku;
-            public string $desc;
-            public string $qty;
-        };
-
         $ref = new \ReflectionClass($this->getWrappedObject());
         $prop = $ref->getProperty('prototype');
         $prop->setAccessible(true);
-        $prop->setValue($this->getWrappedObject(), $model);
+        $prop->setValue($this->getWrappedObject(), new MockModel());
 
         $uuid = '1234-5678-9012-3456';
 
@@ -190,20 +185,22 @@ class TableGatewaySpec extends ObjectBehavior
             'qty' => 1,
         ])->shouldReturn('1');
 
-        $result = $this->fetch();
-
-        $result->uuid->shouldReturn($uuid);
-        $result->desc->shouldReturn('test');
+        $this->fetch()->getUuid()->shouldReturn($uuid);
     }
 
     public function it_should_work_with_defined_models()
     {
         $ref = new \ReflectionClass($this->getWrappedObject());
+
+        $prop = $ref->getProperty('prototype');
+        $prop->setAccessible(true);
+        $prop->setValue($this->getWrappedObject(), null);
+
         $prop = $ref->getProperty('model');
         $prop->setAccessible(true);
-        $prop->setValue($this->getWrappedObject(), \MockModel::class);
+        $prop->setValue($this->getWrappedObject(), MockModel::class);
 
-        $uuid = '1234-5678-9012-3456';
+        $uuid = '3456-5678-9012-1234';
 
         $this->insert([
             'uuid' => $uuid,
@@ -214,7 +211,16 @@ class TableGatewaySpec extends ObjectBehavior
 
         $result = $this->fetch();
 
-        $result->uuid->shouldReturn($uuid);
-        $result->desc->shouldReturn('test');
+        $this->fetch()->getUuid()->shouldReturn($uuid);
+    }
+}
+
+class MockModel
+{
+    protected string $uuid;
+
+    public function getUuid(): string
+    {
+        return $this->uuid;
     }
 }

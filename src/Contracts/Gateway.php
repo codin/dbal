@@ -33,7 +33,7 @@ interface Gateway
     /**
      * Fetch the first row from a query
      */
-    public function fetch(?QueryBuilder $query = null): ?Model;
+    public function fetch(?QueryBuilder $query = null): ?object;
 
     /**
      * Get array of entities from the query

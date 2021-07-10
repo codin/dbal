@@ -4,34 +4,17 @@ declare(strict_types=1);
 
 namespace Codin\DBAL\Traits;
 
-use Codin\DBAL\Contracts;
 use ReflectionClass;
-use ReflectionProperty;
+use function get_class;
 
 trait Models
 {
     /**
-     * Get public properties on a model that can be set. Returns key-value array.
-     */
-    protected function getModelProps(Contracts\Model $model): array
-    {
-        $definitions = [];
-        $ref = new ReflectionClass($model);
-        $props = $ref->getProperties(ReflectionProperty::IS_PUBLIC);
-
-        foreach ($props as $prop) {
-            $definitions[$prop->getName()] = $prop->isInitialized($model) ? $model->{$prop->getName()} : null;
-        }
-
-        return $definitions;
-    }
-
-    /**
      * Create a new entity
      */
-    protected function createModel(): Contracts\Model
+    protected function createModel(): object
     {
-        if ($this->prototype instanceof Contracts\Model) {
+        if (is_object($this->prototype)) {
             return clone $this->prototype;
         }
 
@@ -41,7 +24,7 @@ trait Models
         }
 
         // create anon object class to create rows from
-        return new class() implements Contracts\Model {
+        return new class() {
             protected array $attributes = [];
             public function __get(string $name): ?string
             {
@@ -57,7 +40,7 @@ trait Models
     /**
      * Create a model entity from database row
      */
-    protected function model(array $attributes): Contracts\Model
+    protected function model(array $attributes): object
     {
         $model = $this->createModel();
 
@@ -68,10 +51,14 @@ trait Models
             return $model;
         }
 
-        $props = $this->getModelProps($model);
+        $ref = new ReflectionClass($model);
+        $props = $ref->getProperties();
 
-        foreach ($props as $prop => $default) {
-            $model->{$prop} = \array_key_exists($prop, $attributes) ? $attributes[$prop] : $default;
+        foreach ($props as $prop) {
+            if (array_key_exists($prop->getName(), $attributes)) {
+                $prop->setAccessible(true);
+                $prop->setValue($model, $attributes[$prop->getName()]);
+            }
         }
 
         return $model;

@@ -7,11 +7,19 @@ Usage
 ```php
 class Product
 {
-    public string $uuid;
+    protected string $uuid;
 
-    public string $sku;
+    protected string $desc;
 
-    public string $desc;
+    public function getUuid(): string
+    {
+        return $this->uuid;
+    }
+
+    public function getDesc(): string
+    {
+        return $this->desc;
+    }
 }
 
 class Products extends Codin\DBAL\TableGateway
@@ -24,10 +32,10 @@ class Products extends Codin\DBAL\TableGateway
 }
 
 $conn = new Doctrine\DBAL\Connection(['pdo' => new PDO('sqlite:products.db')]);
-$conn->exec('create table if not exists products (uuid string, sku string, desc string)');
+$conn->exec('create table if not exists products (uuid string, desc string)');
 
 $products = new Products($conn);
-$products->insert(['desc' => 'banana', 'sku' => 'ban1', 'uuid' => 'BAN01']);
+$products->insert(['desc' => 'banana', 'uuid' => 'BAN01']);
 $banana = $products->fetch();
-echo $product->desc; // "banana"
+echo $product->getDesc(); // "banana"
 ```

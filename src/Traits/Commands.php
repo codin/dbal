@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Codin\DBAL\Traits;
 
-use Codin\DBAL\Contracts;
 use Codin\DBAL\Exceptions;
 use Doctrine\DBAL\Exception\DriverException;
 use Doctrine\DBAL\Query\QueryBuilder;
@@ -32,7 +31,7 @@ trait Commands
     /**
      * Fetch the first row from a query
      */
-    public function fetch(?QueryBuilder $query = null): ?Contracts\Model
+    public function fetch(?QueryBuilder $query = null): ?object
     {
         $statement = $this->execute($query);
 

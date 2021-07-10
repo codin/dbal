@@ -19,7 +19,7 @@ class TableGateway implements Contracts\Gateway
     /**
      * The entity prototype to clone for each row
      */
-    protected ?Contracts\Model $prototype = null;
+    protected ?object $prototype = null;
 
     /**
      * The class name of the model to prototype
@@ -36,7 +36,7 @@ class TableGateway implements Contracts\Gateway
      */
     protected string $primary;
 
-    public function __construct(Connection $conn, ?Contracts\Model $prototype = null)
+    public function __construct(Connection $conn, ?object $prototype = null)
     {
         $this->conn = $conn;
         $this->prototype = $prototype;
